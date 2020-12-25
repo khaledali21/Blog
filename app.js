@@ -55,24 +55,32 @@ app.post("/compose", function(req, res){
     title: req.body.postTitle,
     content: req.body.postBody
   });
-  post.save();
-  res.redirect("/");
+  post.save(function(err){
+    if (err){
+      console.log(err);
+    }
+    else{
+      res.redirect("/");
+    }
+  });
 });
 
-app.get("/posts/:postName", function(req, res){
-  const requestedTitle = _.lowerCase(req.params.postName);
-
-  posts.forEach(function(post){
-    const storedTitle = _.lowerCase(post.title);
-
-    if (storedTitle === requestedTitle) {
+app.get("/posts/:postID", function(req, res){
+  const postID = req.params.postID
+  Post.findOne({_id: postID}, function(err, post){
+    if(err){
+      console.log(err);
+    }
+    else if(!post){
+      res.send("<h1>Post Doesn't Exist</h1>");
+    }
+    else{
       res.render("post", {
         title: post.title,
         content: post.content
       });
     }
   });
-
 });
 let port = process.env.PORT;
 if (port == null || port == "") {
